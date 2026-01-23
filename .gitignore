@@ -4,6 +4,9 @@ key.txt
 
 # Encrypted config (user-specific)
 
+# Plain config (do not commit)
+winix.yaml
+
 # Decrypted secret files
 secrets/*.age.decrypted
 secrets/id_ed25519
