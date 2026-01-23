@@ -1,0 +1,25 @@
+# Age secret keys (NEVER commit)
+key.txt
+*.key
+
+# Encrypted config (user-specific)
+winix.yaml.age
+
+# Decrypted secret files
+secrets/*.age.decrypted
+secrets/id_ed25519
+secrets/id_rsa
+
+# Local state (user-specific)
+# state.json is at ~/.config/winix/, not here
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
