@@ -1,0 +1,22 @@
+packages:
+  scoop:
+    buckets:
+      - main
+      - extras
+    apps:
+      - 7zip
+      - git
+      - pwsh
+  winget:
+    apps:
+      - Microsoft.VisualStudioCode
+
+environment:
+  path:
+    user:
+      prepend:
+        - "~\\.local\\bin"
+
+dotfiles:
+  source: ".\\dotfiles"
+  target: "~"
