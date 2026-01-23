@@ -336,7 +336,7 @@ function Invoke-PackageApply {
         else {
             Write-Host "$prefix  - $app" -ForegroundColor Red -NoNewline
             try {
-                scoop uninstall $app 2>&1 | Out-Null
+                $null = scoop uninstall $app *>&1
                 Write-Host "             done" -ForegroundColor DarkGray
             }
             catch {
