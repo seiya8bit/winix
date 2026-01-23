@@ -246,7 +246,31 @@ function _ApplyAcl {
         }
     }
 
-    Set-Acl -Path $Path -AclObject $acl
+    try {
+        Set-Acl -Path $Path -AclObject $acl
+    }
+    catch {
+        if (Test-GsudoInstalled) {
+            $tempAcl = [System.IO.Path]::GetTempFileName()
+            try {
+                Set-Acl -Path $tempAcl -AclObject $acl
+                $script = @"
+`$acl = Get-Acl -Path '$tempAcl'
+Set-Acl -Path '$Path' -AclObject `$acl
+"@
+                gsudo pwsh -NoProfile -Command $script | Out-Null
+            }
+            catch {
+                Write-Warning "Failed to apply ACL to '$Path' even with elevation."
+            }
+            finally {
+                Remove-Item -Path $tempAcl -Force -ErrorAction SilentlyContinue
+            }
+        }
+        else {
+            Write-Warning "Failed to apply ACL to '$Path' (insufficient privilege). Install gsudo to allow elevation."
+        }
+    }
 }
 
 function Get-EncryptedFilesDiff {
