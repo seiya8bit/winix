@@ -29,6 +29,23 @@ else {
     Write-Host "Scoop is already installed." -ForegroundColor Green
 }
 
+# Ensure PowerShell 7 is available (required by winix)
+$pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+if (-not $pwshCommand) {
+    Write-Host "Installing PowerShell 7 (pwsh)..." -ForegroundColor Yellow
+    try {
+        scoop install pwsh | Out-Null
+        $pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+        if (-not $pwshCommand) {
+            throw "pwsh not found after installation"
+        }
+        Write-Host "PowerShell 7 installed successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Warning "Failed to install PowerShell 7 automatically. winix requires pwsh (PowerShell 7)."
+    }
+}
+
 $psYamlInstalled = Get-Module -ListAvailable -Name powershell-yaml
 if (-not $psYamlInstalled) {
     Write-Host "Installing powershell-yaml module..." -ForegroundColor Yellow
@@ -59,7 +76,13 @@ $winixFunction = @"
 
 # winix command
 function winix {
-    & '$winixPath' @args
+    `$pwsh = Get-Command pwsh -ErrorAction SilentlyContinue
+    if (`$pwsh) {
+        & `$pwsh.Source -NoProfile -ExecutionPolicy Bypass -File '$winixPath' @args
+    }
+    else {
+        & '$winixPath' @args
+    }
 }
 "@
 
@@ -81,10 +104,24 @@ else {
 
 # Check if encrypted_files are configured
 $configPath = Join-Path $script:ScriptDir "winix.yaml"
+$encryptedConfigPath = Join-Path $script:ScriptDir "winix.yaml.age"
 $hasEncryptedFiles = $false
 if (Test-Path $configPath) {
     $configContent = Get-Content -Path $configPath -Raw
     if ($configContent -match "encrypted_files:") {
+        $hasEncryptedFiles = $true
+    }
+}
+elseif (Test-Path $encryptedConfigPath) {
+    # Try cache if available; otherwise assume encrypted files may exist.
+    $cachePath = Join-Path $env:USERPROFILE ".config\winix\cache\config.yaml"
+    if (Test-Path $cachePath) {
+        $cacheContent = Get-Content -Path $cachePath -Raw
+        if ($cacheContent -match "encrypted_files:") {
+            $hasEncryptedFiles = $true
+        }
+    }
+    else {
         $hasEncryptedFiles = $true
     }
 }
@@ -101,14 +138,37 @@ if ($hasEncryptedFiles) {
         scoop install bitwarden-cli
     }
 
+    # Ensure Bitwarden CLI config dir exists (avoids stderr breaking JSON parse)
+    $bwConfigDir = Join-Path $env:APPDATA "Bitwarden CLI"
+    if (-not (Test-Path $bwConfigDir)) {
+        New-Item -ItemType Directory -Path $bwConfigDir -Force | Out-Null
+    }
+
+    function _Get-BwStatus {
+        $statusJson = bw status 2>$null
+        if (-not $statusJson) {
+            return $null
+        }
+        try {
+            return $statusJson | ConvertFrom-Json
+        }
+        catch {
+            return $null
+        }
+    }
+
     # Check Bitwarden status
-    $bwStatus = bw status 2>&1 | ConvertFrom-Json -ErrorAction SilentlyContinue
+    $bwStatus = _Get-BwStatus
+    if (-not $bwStatus) {
+        Start-Sleep -Seconds 1
+        $bwStatus = _Get-BwStatus
+    }
 
     if (-not $bwStatus -or $bwStatus.status -eq "unauthenticated") {
         Write-Host ""
         Write-Host "Please login to Bitwarden:" -ForegroundColor Yellow
         bw login
-        $bwStatus = bw status 2>&1 | ConvertFrom-Json
+        $bwStatus = _Get-BwStatus
     }
 
     if ($bwStatus.status -eq "locked") {
@@ -132,7 +192,13 @@ Write-Host "Running initial 'winix apply'..." -ForegroundColor Cyan
 Write-Host ""
 
 try {
-    & $winixPath apply
+    $pwshCommand = Get-Command pwsh -ErrorAction SilentlyContinue
+    if ($pwshCommand) {
+        & $pwshCommand.Source -NoProfile -ExecutionPolicy Bypass -File $winixPath apply
+    }
+    else {
+        & $winixPath apply
+    }
 }
 catch {
     Write-Warning "Initial apply failed: $_"
