@@ -1,0 +1,23 @@
+[user]
+  name = Seiya
+  email = seiya8bit@outlook.com
+[init]
+  defaultBranch = main
+[core]
+  quotepath = false
+  editor = nvim
+  ignorecase = false
+  pager = delta
+[interactive]
+  diffFilter = delta --color-only
+[delta]
+  navigate = true
+  dark = true
+[merge]
+  conflictstyle = zdiff3
+[diff]
+  colorMoved = default
+[push]
+  autoSetupRemote = true
+[pull]
+  rebase = true

@@ -1,0 +1,25 @@
+[tools]
+# Runtime
+deno = 'latest'
+node = 'latest'
+uv = 'latest'
+
+# Package Managers
+ni = 'latest'
+pnpm = 'latest'
+
+# AI Tools
+claude = 'latest'
+gemini-cli = 'latest'
+
+# Git Tools
+"ubi:d-kuro/gwq" = 'latest'
+
+# Linters/Formatters
+hadolint = 'latest'
+"npm:markdownlint-cli" = 'latest'
+"npm:oxfmt" = 'latest'
+"npm:oxlint" = 'latest'
+"npm:stylelint" = 'latest'
+"ubi:JohnnyMorganz/StyLua" = 'latest'
+"ubi:Kampfkarren/selene" = 'latest'

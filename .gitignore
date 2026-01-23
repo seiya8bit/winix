@@ -3,7 +3,6 @@ key.txt
 *.key
 
 # Encrypted config (user-specific)
-winix.yaml.age
 
 # Decrypted secret files
 secrets/*.age.decrypted
