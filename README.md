@@ -1,91 +1,64 @@
 # winix
 
-Declarative Environment Manager for Windows 11 (PowerShell 7).
+Personal Windows 11 environment setup using winix.
+This branch tracks my packages, dotfiles, tasks, and encrypted secrets for a clean machine bootstrap.
 
-winix syncs packages, dotfiles, environment variables, secrets, and custom tasks from a single YAML file.
+## What This Branch Includes
 
-## Features
-
-- Scoop packages and buckets (full sync)
-- Winget packages (additive)
-- Dotfiles (copy-based)
-- Environment variables and PATH (user/machine)
-- age-encrypted files with optional Bitwarden CLI integration
-- Custom tasks via `tasks/*.ps1`
+- Scoop packages (full sync) and Winget packages (additive)
+- Dotfiles under `dotfiles/`
+- Custom tasks under `tasks/`
+- Encrypted files under `secrets/` (age)
+- Encrypted configuration `winix.yaml.age`
 
 ## Requirements
 
 - Windows 11
-- PowerShell 7
-- Scoop (auto-installed by bootstrap)
-- Module: powershell-yaml (auto-installed by bootstrap)
+- PowerShell 7 (installed by bootstrap)
+- Scoop (installed by bootstrap)
+- Module: powershell-yaml (installed by bootstrap)
 
-Optional:
-- gsudo (for machine-level env/PATH)
+Required for this branch:
+
+- gsudo (for machine-level env/PATH and ACL updates)
 - age (for encrypted files)
-- Bitwarden CLI (if using `age.bitwarden_item`)
+- Bitwarden CLI (for age key via Bitwarden)
 
-## Quick Start
+## Encrypted Config & Secrets
+
+This branch stores the config as `winix.yaml.age`.
+The plain `winix.yaml` is not tracked.
+
+Set Bitwarden as the default source for the age key:
 
 ```powershell
-# 1. Clone
-# git clone https://github.com/<username>/winix.git
-# cd winix
-
-# 2. Bootstrap (installs Scoop, powershell-yaml, registers winix command)
-.\bootstrap.ps1
-
-# 3. Preview changes
-winix status
-
-# 4. Apply
-winix apply
+$env:WINIX_BITWARDEN_ITEM = "winix-age-key"
 ```
 
-## Configuration
+Bitwarden CLI flow (required for this branch):
 
-`winix.yaml` (or encrypted `winix.yaml.age`)
+```powershell
+bw login
+$env:BW_SESSION = (bw unlock --raw)
+```
 
-```yaml
-packages:
-  scoop:
-    buckets:
-      - main
-      - extras
-    apps:
-      - git
-      - neovim
-  winget:
-    apps:
-      - Microsoft.PowerToys
+## Branch Notes
 
-dotfiles:
-  source: "./dotfiles"
-  target: "~"
+- `winix.yaml.age` is the source of truth.
+- `dotfiles/` and `tasks/` are customized for this branch.
+- If you need to edit the config:
 
-environment:
-  user:
-    EDITOR: "nvim"
-  path:
-    user:
-      append:
-        - "%USERPROFILE%\\bin"
-
-age:
-  public_key: "age1..."
-  bitwarden_item: "winix-age-key"
-
-encrypted_files:
-  - source: "./secrets/id_ed25519.age"
-    target: "~/.ssh/id_ed25519"
-    acl: private
+```powershell
+winix config decrypt --force
+nvim winix.yaml
+winix config encrypt --remove
 ```
 
 ## Commands
 
 ```powershell
-winix status      # Preview changes (only preview mode)
-winix apply       # Apply configuration
+winix status
+winix apply
 winix --help
 winix --version
 
