@@ -1,103 +1,60 @@
 # winix
 
-Declarative Environment Manager for Windows 11
+Declarative Environment Manager for Windows 11 (PowerShell 7).
 
-## Documentation
+## Specs / References
 
-| Document | Content |
-|----------|---------|
-| [docs/spec/](docs/spec/README.md) | Specifications (CLI, config file, behavior) |
+- `docs/spec/README.md` (entry point)
+- `docs/spec/config.md` (winix.yaml / winix.yaml.age)
+- `docs/spec/behavior.md`
+- `docs/spec/cli.md`
 
 ## Common Commands
 
 ```powershell
-winix status              # Show differences
-winix apply               # Apply configuration
+winix status                  # Preview changes
+winix apply                   # Apply configuration
+winix config encrypt --remove # Encrypt winix.yaml -> winix.yaml.age
+winix config decrypt --force  # Decrypt winix.yaml.age -> winix.yaml
+winix secret encrypt <file>   # Encrypt file -> <file>.age
+winix secret decrypt <file>   # Decrypt to stdout
 ```
 
----
+## Encrypted Config Notes
+
+- `winix.yaml` takes precedence if it exists.
+- Encrypted config uses `winix.yaml.age`.
+- Auto-decrypt uses env vars only:
+  - `WINIX_AGE_KEY`
+  - `WINIX_AGE_KEY_FILE`
+  - `WINIX_BITWARDEN_ITEM`
+- Bitwarden requires `bw login`, `bw unlock`, and `BW_SESSION` set.
 
 ## Coding Conventions
 
-### Naming Rules
+- Indent: 4 spaces
+- Strings: double quotes for interpolation, single quotes for literals
+- Private functions: `_Prefix` (underscore)
+- Help comments for public functions (`.SYNOPSIS`, `.PARAMETER`)
+- `$ErrorActionPreference = 'Stop'` at top of scripts
+- Use `Write-Error` and `throw` only for fatal errors
 
-| Target | Convention | Example |
-|--------|------------|---------|
-| Functions | PascalCase | `Get-PackageList`, `Install-DotFiles` |
-| Variables | camelCase | `$configPath`, `$installedApps` |
-| Constants | UPPER_SNAKE_CASE | `$STATE_FILE_PATH` |
-| Private functions | Prefix with underscore | `_ValidateConfig` |
+## Output/UI Conventions
 
-### Code Style
+- Use `Write-UiBanner` and `Write-SectionHeader` for main sections.
+- Keep per-item output to a single line where possible (avoid mixing tool output).
 
-- Indentation: 4 spaces
-- Strings: Prefer double quotes (for variable expansion), use single quotes for literals
-- Pipelines: Place `|` at end of line and break to new line for long pipelines
-- Comments: Write help comments (`.SYNOPSIS`, `.PARAMETER`) for functions
+## Commit Messages
 
-### Error Handling
-
-- Set `$ErrorActionPreference = 'Stop'` at script beginning
-- Wrap external commands in `try-catch`
-- Output error messages with `Write-Error` (use `throw` only for fatal errors)
-
----
-
-## Prohibited Practices
-
-### Code Implementation
-
-| Prohibited | Reason |
-|------------|--------|
-| CI environment branching like `if ($env:CI)` | Reliability decreases when code paths differ between production and CI |
-| CI-specific skip processing or mocks | Same as above |
-| Leaving unused code | Reduces readability, causes future confusion |
-| Leaving commented-out code | Same as above |
-
-### Work Process
-
-| Prohibited | Reason |
-|------------|--------|
-| Completing work with "it probably works" | Code without verification cannot guarantee quality |
-| Committing without verification | Same as above |
-| Starting implementation without checking specifications | Causes requirement gaps and rework |
-
----
-
-## Development Workflow
-
-### Commit Messages
+Free-form is OK. If using a prefix, prefer:
 
 ```
-<type>: <summary>
+feat: ...
+fix: ...
+refactor: ...
+docs: ...
+chore: ...
 ```
-
-| type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `refactor` | Refactoring |
-| `docs` | Documentation |
-| `chore` | Other |
-
-### Workflow
-
-1. **Preparation**: Read [specifications](docs/spec/README.md) and understand requirements
-2. **Implementation**: Modify code
-3. **Verification**: Confirm all commands work correctly
-4. **Regression check**: Confirm existing features are not broken
-5. **Completion**: Commit & push
-
-### Verification (Required)
-
-```powershell
-winix --help
-winix --version
-winix status
-winix apply
-```
-
----
 
 ## Directory Structure
 
@@ -105,14 +62,14 @@ winix apply
 winix/
 ├── winix.ps1           # Entry point
 ├── bootstrap.ps1       # Initial setup
-├── winix.yaml          # Configuration file
+├── winix.yaml          # Plain config (optional)
+├── winix.yaml.age      # Encrypted config
 ├── lib/                # Modules
+├── tasks/              # Custom tasks
 ├── dotfiles/           # Dotfiles source
-├── secrets/            # Encrypted files
+├── secrets/            # Encrypted files (.age)
 ├── CLAUDE.md           # This file
 ├── README.md           # Public README (English)
 └── docs/
-    ├── ja/
-    │   └── README.md   # Public README (Japanese)
     └── spec/           # Specifications
 ```
