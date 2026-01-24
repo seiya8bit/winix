@@ -48,6 +48,8 @@ return {
         javascriptreact = { "oxlint" },
         typescript = { "oxlint" },
         typescriptreact = { "oxlint" },
+        json = { "jsonlint" },
+        yaml = { "yamllint" },
         css = { "stylelint" },
         markdown = { "markdownlint" },
         lua = { "selene" },
