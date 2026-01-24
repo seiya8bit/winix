@@ -26,3 +26,10 @@ yamllint = 'latest'
 "npm:stylelint" = 'latest'
 "ubi:JohnnyMorganz/StyLua" = 'latest'
 "ubi:Kampfkarren/selene" = 'latest'
+
+[tasks.setup]
+description = "Install uv tools"
+run = """
+uv tool install fonttools --with brotli
+uv tool install gdtoolkit==4.*
+"""
