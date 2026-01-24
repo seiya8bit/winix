@@ -22,6 +22,7 @@ return {
     opts = {
       ensure_installed = {
         "lua_ls", "ts_ls", "cssls", "jsonls", "yamlls", "taplo", "marksman", "dockerls",
+        "powershell_es",
       },
     },
   },
