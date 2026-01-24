@@ -11,6 +11,7 @@ pnpm = 'latest'
 # AI Tools
 claude = 'latest'
 gemini-cli = 'latest'
+codex = 'latest'
 
 # Git Tools
 "ubi:d-kuro/gwq" = 'latest'
