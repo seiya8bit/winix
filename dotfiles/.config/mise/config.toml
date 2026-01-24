@@ -18,6 +18,8 @@ codex = 'latest'
 
 # Linters/Formatters
 hadolint = 'latest'
+yamllint = 'latest'
+"npm:jsonlint" = 'latest'
 "npm:markdownlint-cli" = 'latest'
 "npm:oxfmt" = 'latest'
 "npm:oxlint" = 'latest'
