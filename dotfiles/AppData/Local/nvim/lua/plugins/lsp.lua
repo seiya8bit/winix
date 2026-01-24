@@ -21,7 +21,14 @@ return {
     dependencies = { "mason-org/mason.nvim", "neovim/nvim-lspconfig" },
     opts = {
       ensure_installed = {
-        "lua_ls", "ts_ls", "cssls", "jsonls", "yamlls", "taplo", "marksman", "dockerls",
+        "lua_ls",
+        "ts_ls",
+        "cssls",
+        "jsonls",
+        "yamlls",
+        "taplo",
+        "marksman",
+        "dockerls",
         "powershell_es",
       },
     },
@@ -83,6 +90,14 @@ return {
           },
         },
       })
+
+      -- Godot GDScript LSP (requires Godot Editor running)
+      vim.lsp.config("gdscript", {
+        cmd = vim.lsp.rpc.connect("127.0.0.1", 6005),
+        filetypes = { "gdscript" },
+        root_markers = { "project.godot" },
+      })
+      vim.lsp.enable("gdscript")
     end,
   },
 }

@@ -29,6 +29,7 @@ return {
         markdown = { "oxfmt" },
         css = { "oxfmt" },
         lua = { "stylua" },
+        gdscript = { "gdformat" },
       },
       formatters = {
         oxfmt = { command = function() return local_bin("oxfmt") end },
@@ -54,6 +55,7 @@ return {
         markdown = { "markdownlint" },
         lua = { "selene" },
         dockerfile = { "hadolint" },
+        gdscript = { "gdlint" },
       }
 
       vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {

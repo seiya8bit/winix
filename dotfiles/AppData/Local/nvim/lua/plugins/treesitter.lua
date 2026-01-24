@@ -21,6 +21,9 @@ return {
       "powershell",
       -- Infra
       "dockerfile",
+      -- GameDev
+      "gdscript",
+      "godot_resource",
     })
   end,
 }
