@@ -299,7 +299,13 @@ function global:Invoke-TaskApply {
             continue
         }
 
-        $info = _GetLatestWindowsDriverInfo $page
+        $info = $null
+        try {
+            $info = _GetLatestWindowsDriverInfo $page
+        }
+        catch {
+            $info = $null
+        }
         if (-not $info) {
             Write-Warning "Latest Windows driver not found for $page"
             continue
