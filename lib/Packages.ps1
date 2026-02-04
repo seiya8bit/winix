@@ -336,12 +336,21 @@ function Invoke-PackageApply {
         else {
             Write-Host "$prefix  - $app" -ForegroundColor Red -NoNewline
             try {
-                $null = scoop uninstall $app *>&1
-                Write-Host "             done" -ForegroundColor DarkGray
+                $output = scoop uninstall $app *>&1
+                $outputString = $output -join "`n"
+                if ($LASTEXITCODE -ne 0 -or $outputString -match "error|failed") {
+                    Write-Host "             failed" -ForegroundColor Red
+                    if ($outputString) {
+                        Write-Warning $outputString
+                    }
+                }
+                else {
+                    Write-Host "             done" -ForegroundColor DarkGray
+                }
             }
             catch {
                 Write-Host "             failed" -ForegroundColor Red
-                throw
+                Write-Warning $_.Exception.Message
             }
         }
         $changes++
@@ -358,14 +367,23 @@ function Invoke-PackageApply {
             Write-Host "$prefix  ~ $($app.name)" -ForegroundColor Yellow -NoNewline
             try {
                 scoop unhold $app.name 2>&1 | Out-Null
-                scoop uninstall $app.name 2>&1 | Out-Null
-                _InvokeScoopInstall -AppSpec "$($app.name)@$($app.targetVersion)" -Silent
-                scoop hold $app.name 2>&1 | Out-Null
-                Write-Host "             done" -ForegroundColor DarkGray
+                $output = scoop uninstall $app.name *>&1
+                $outputString = $output -join "`n"
+                if ($LASTEXITCODE -ne 0 -or $outputString -match "error|failed") {
+                    Write-Host "             failed" -ForegroundColor Red
+                    if ($outputString) {
+                        Write-Warning $outputString
+                    }
+                }
+                else {
+                    _InvokeScoopInstall -AppSpec "$($app.name)@$($app.targetVersion)" -Silent
+                    scoop hold $app.name 2>&1 | Out-Null
+                    Write-Host "             done" -ForegroundColor DarkGray
+                }
             }
             catch {
                 Write-Host "             failed" -ForegroundColor Red
-                throw
+                Write-Warning $_.Exception.Message
             }
         }
         $changes++
