@@ -28,18 +28,26 @@ Optional:
 ## Quick Start
 
 ```powershell
-# 1. Clone
-# git clone https://github.com/<username>/winix.git
-# cd winix
+# 1. Install Scoop
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 
-# 2. Bootstrap (installs Scoop, powershell-yaml, registers winix command)
+# 2. Install prerequisites
+scoop install git
+scoop install pwsh
+
+# 3. Clone and bootstrap
+git clone https://github.com/<username>/winix.git
+cd winix
 .\bootstrap.ps1
 
-# 3. Preview changes
-winix status
+# 4. Preview changes
+.\winix.ps1 status
 
-# 4. Apply
-winix apply
+# 5. Apply configuration
+.\winix.ps1 apply
+
+# After bootstrap, the `winix` command is available globally.
 ```
 
 ## Configuration
