@@ -86,6 +86,7 @@ function Invoke-WinixApply {
     $state = Get-WinixState
 
     $totalChanges = 0
+    $hadErrors = $false
 
     if ($BannerTitle) {
         Write-UiBanner -Title $BannerTitle -Subtitle $BannerSubtitle
@@ -105,9 +106,15 @@ function Invoke-WinixApply {
             $diff.apps.toInstall.Count -gt 0 -or
             $diff.apps.toRemove.Count -gt 0 -or
             $diff.apps.toUpdate.Count -gt 0) {
-            Write-SectionHeader -Title "Packages / Scoop"
-            $result = Invoke-PackageApply -Config $config -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "Packages / Scoop"
+                $result = Invoke-PackageApply -Config $config -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
     }
 
@@ -117,9 +124,15 @@ function Invoke-WinixApply {
         if ($wingetDiff.apps.toInstall.Count -gt 0 -or
             $wingetDiff.apps.toRemove.Count -gt 0 -or
             $wingetDiff.apps.toUpdate.Count -gt 0) {
-            Write-SectionHeader -Title "Packages / Winget"
-            $result = Invoke-WingetPackageApply -Config $config -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "Packages / Winget"
+                $result = Invoke-WingetPackageApply -Config $config -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
     }
 
@@ -131,9 +144,15 @@ function Invoke-WinixApply {
             $envDiff.machine.toAdd.Count -gt 0 -or
             $envDiff.machine.toUpdate.Count -gt 0 -or
             $envDiff.machine.toRemove.Count -gt 0) {
-            Write-SectionHeader -Title "Environment"
-            $result = Invoke-EnvironmentApply -Config $config -State $state -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "Environment"
+                $result = Invoke-EnvironmentApply -Config $config -State $state -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
 
         $pathDiff = Get-PathDiff -Config $config -State $state
@@ -150,9 +169,15 @@ function Invoke-WinixApply {
             if ($pathHasChanges) { break }
         }
         if ($pathHasChanges) {
-            Write-SectionHeader -Title "PATH"
-            $result = Invoke-PathApply -Config $config -State $state -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "PATH"
+                $result = Invoke-PathApply -Config $config -State $state -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
     }
 
@@ -164,9 +189,15 @@ function Invoke-WinixApply {
                       $dotfilesDiff.toTrack.Count -gt 0
 
         if ($hasChanges) {
-            Write-SectionHeader -Title "Dotfiles"
-            $result = Invoke-DotfilesApply -Config $config -State $state -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "Dotfiles"
+                $result = Invoke-DotfilesApply -Config $config -State $state -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
     }
 
@@ -175,9 +206,15 @@ function Invoke-WinixApply {
         if ($encryptedDiff.toAdd.Count -gt 0 -or
             $encryptedDiff.toUpdate.Count -gt 0 -or
             $encryptedDiff.toRemove.Count -gt 0) {
-            Write-SectionHeader -Title "Encrypted Files"
-            $result = Invoke-EncryptedFilesApply -Config $config -State $state -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                Write-SectionHeader -Title "Encrypted Files"
+                $result = Invoke-EncryptedFilesApply -Config $config -State $state -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
     }
 
@@ -191,8 +228,14 @@ function Invoke-WinixApply {
             }
         }
         if ($tasksHasChanges) {
-            $result = Invoke-TasksApply -Config $config -State $state -DryRun:$DryRun
-            $totalChanges += $result.changes
+            try {
+                $result = Invoke-TasksApply -Config $config -State $state -DryRun:$DryRun
+                $totalChanges += $result.changes
+            }
+            catch {
+                $hadErrors = $true
+                Write-Warning $_.Exception.Message
+            }
         }
         elseif (-not $DryRun) {
             # Track UpToDate items in state (for initial state setup)
@@ -208,7 +251,7 @@ function Invoke-WinixApply {
         }
     }
 
-    if (-not $DryRun) {
+    if (-not $DryRun -and -not $hadErrors) {
         Save-WinixState -State $state
     }
 
