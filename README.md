@@ -98,13 +98,63 @@ This branch (`seiya8bit-setup`) is a personal configuration that includes:
 - Custom dotfiles and tasks
 - Encrypted secrets using age + Bitwarden
 
+### Setup from Scratch (New PC)
+
+Steps to set up a fresh Windows 11 machine.
+
+#### 1. Check out this branch
+
+```powershell
+git checkout seiya8bit-setup
+```
+
+#### 2. Install Scoop
+
+Open PowerShell and run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+```
+
+#### 3. Install required tools
+
+```powershell
+scoop bucket add extras
+scoop install git
+scoop install pwsh
+scoop install age
+scoop install bitwarden-cli
+scoop install extras/wezterm
+```
+
+> **Note:** After installing `pwsh` (PowerShell 7), open a new terminal (e.g. WezTerm) and run `pwsh`. All following steps should be run in PowerShell 7.
+
+#### 4. Run bootstrap
+
+```powershell
+.\bootstrap.ps1
+```
+
+This will automatically install any missing prerequisites (Scoop, PowerShell 7, etc.).
+
+#### 5. Check status
+
+```powershell
+.\winix.ps1 status
+```
+
+This previews pending changes. If everything looks good, run `.\winix.ps1 apply` to apply them.
+
 ### Decrypting the Config
+
+To edit the encrypted config (`winix.yaml.age`):
 
 ```powershell
 # Set Bitwarden as age key source
 $env:WINIX_BITWARDEN_ITEM = "winix-age-key"
 
-# Unlock Bitwarden
+# Log in to Bitwarden and get a session
 bw login
 $env:BW_SESSION = (bw unlock --raw)
 
