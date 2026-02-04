@@ -96,6 +96,32 @@ if ($profileContent -notmatch "function winix") {
     Add-Content -Path $PROFILE -Value $winixFunction
     Write-Host "winix command registered." -ForegroundColor Green
 }
+elseif ($profileContent -notmatch [regex]::Escape($winixPath)) {
+    Write-Host "Updating winix command path in PowerShell profile..." -ForegroundColor Yellow
+    $lines = Get-Content -Path $PROFILE
+    $newLines = [System.Collections.Generic.List[string]]::new()
+    $skipping = $false
+    $braceDepth = 0
+    foreach ($line in $lines) {
+        if (-not $skipping -and $line -match '^\s*# winix command\s*$') {
+            $skipping = $true
+            $braceDepth = 0
+            continue
+        }
+        if ($skipping) {
+            $braceDepth += ($line.ToCharArray() | Where-Object { $_ -eq '{' }).Count
+            $braceDepth -= ($line.ToCharArray() | Where-Object { $_ -eq '}' }).Count
+            if ($braceDepth -le 0) {
+                $skipping = $false
+            }
+            continue
+        }
+        $newLines.Add($line)
+    }
+    $newLines.Add($winixFunction)
+    Set-Content -Path $PROFILE -Value ($newLines -join "`n")
+    Write-Host "winix command path updated." -ForegroundColor Green
+}
 else {
     Write-Host "winix command is already registered." -ForegroundColor Green
 }
