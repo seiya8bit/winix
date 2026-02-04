@@ -2,6 +2,7 @@
 # Runtime
 deno = 'latest'
 node = 'latest'
+python = 'latest'
 uv = 'latest'
 
 # Package Managers
@@ -10,8 +11,8 @@ pnpm = 'latest'
 
 # AI Tools
 claude = 'latest'
-gemini-cli = 'latest'
 codex = 'latest'
+gemini-cli = 'latest'
 
 # Git Tools
 "ubi:d-kuro/gwq" = 'latest'
