@@ -51,5 +51,8 @@ function tree { eza --tree --icons $args }
 function ccskip { claude --dangerously-skip-permissions --chrome }
 function ccu { npx ccusage@latest }
 
+# Codex CLI
+function cdxskip { codex --dangerously-bypass-approvals-and-sandbox }
+
 # Conflict resolution
 Remove-Alias -Name ni -Force -ErrorAction SilentlyContinue
